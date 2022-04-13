@@ -1,5 +1,5 @@
 import { Schema, model } from 'mongoose'
-import { TimeReport } from "../types";
+import { TimeReport} from "../types";
 
 // interface Project {
 //     email: string,
@@ -11,12 +11,12 @@ import { TimeReport } from "../types";
 // }
 
 const schema = new Schema<TimeReport>({
-    id: { type: Number },
+    // id: { type: Number },
     email: { type: String, required: true },
     time: { type: Date, required: true },
     description: { type: String, required: true },
     hours: { type: Number, required: true },
-    project_id: { type: Number, required: true }
+    project_id: { type: String, required: true }
 })
 
 const TimeReportModel = model<TimeReport>('TimeReport', schema)
@@ -32,53 +32,59 @@ export const getTimeReport = async () => {
 
 
 
-// type getTimeReportFilter = {
-//     email?: string;
-//     year?: number;
-//     month?: number;
-//     project?: string;
-// };
+type getTimeReportFilter = {
+    email?: string;
+    year?: number;
+    month?: number;
+    project?: string;
+};
 
-// export const getTimeReport = async ({
-//     email,
-//     year,
-//     month,
-//     project,
-// }: getTimeReportFilter) => {
-//     let where = [];
-//     let params = [];
-//     if (email) {
-//         params.push(email);
-//         where.push(`email = $${params.length}`);
-//     }
-//     if (year) {
-//         params.push(year);
-//         where.push(`DATE_PART('year',"time") = $${params.length}`);
-//     }
-//     if (month) {
-//         params.push(month);
-//         where.push(`DATE_PART('month',"time") = $${params.length}`);
-//     }
-//     if (project) {
-//         params.push(project);
-//         where.push(`project_id = $${params.length}`);
-//     }
+export const getTimeReportsByFilter = async ({
+    email,
+    year,
+    month,
+    project,
+}: getTimeReportFilter) => {
+    //let where = [];
+    let params = [];
+    if (email) {
+        params.push(email);
+        //where.push(`email = $${params.length}`);
+    }
+    if (year) {
+        params.push(year);
+        //where.push(`DATE_PART('year',"time") = $${params.length}`);
+    }
+    if (month) {
+        params.push(month);
+        //where.push(`DATE_PART('month',"time") = $${params.length}`);
+    }
+    if (project) {
+        params.push(project);
+        //where.push(`project_id = $${params.length}`);
+    }
+    //const queryParameters = [`time = ${year}-${month}`]
+    const newDate = new Date(year, month, 1)
+    return await TimeReportModel.find({email: email});
+    //const whereClause = !where.length ? "" : "WHERE " + where.join(" AND ");
+    //const sqlQuery = `SELECT * FROM (SELECT id, email, time, description, hours, project_id FROM public.time_reports) AllTimeReports ${whereClause}`;
+    //return query(sqlQuery, params).then(res => res as TimeReport[]);
+};
 
-//     const whereClause = !where.length ? "" : "WHERE " + where.join(" AND ");
-//     const sqlQuery = `SELECT * FROM (SELECT id, email, time, description, hours, project_id FROM public.time_reports) AllTimeReports ${whereClause}`;
-//     return query(sqlQuery, params).then(res => res as TimeReport[]);
-// };
+export const getTimeReportById = async (timereportId: string) => {
+    return await TimeReportModel.find({_id:timereportId});
+}
+export const deleteTimeReportById = async (timeReportId: string) =>{
+    return await TimeReportModel.deleteOne({_id: timeReportId});
+}
+// export const getTimeReportMeta = async (email: string) => {
 
-// export const getTimeReportById = async (timereportId: number) => {
-//     const sqlQuery = `SELECT * FROM public.time_reports WHERE id = $1`;
-//     const result = await query(sqlQuery, [timereportId]);
-//     return result['length'] === 0 ? null : result[0];
-// };
+// }
 
-// export const deleteTimeReportById = async (timeReportId: number) => {
-//     const sqlQuery = `DELETE FROM public.time_reports WHERE id = $1`;
-//     await query(sqlQuery, [timeReportId]);
-// };
+export const getTimeReportMeta = async (email: string) => {
+    const res = await TimeReportModel.aggregate([ {$match: {'email': email}}, {$group: { _id: {year: {$year: "$time" }, month: {$month: "$time"}}}}])
+    return res.map(meta => ({year: Number(meta._id.year), month: Number(meta._id.month)}))
+}
 
 // export const getTimeReportMeta = async (email: string) => {
 //     const sqlQuery = `SELECT
@@ -96,37 +102,11 @@ export const getTimeReport = async () => {
 // };
 
 export const addTimeReport = async (timeReport: TimeReport) => {
-    console.log("hej");
     const newTimeReport =  new TimeReportModel(timeReport);
     await newTimeReport.save();
     return newTimeReport;
 }
 
-// export const addTimeReport = (timeReport: TimeReport) => {
-
-//     return query(
-//         'INSERT INTO public.time_reports(email, "time", description, hours, project_id) VALUES ($1, $2, $3, $4, $5) RETURNING *',
-//         [
-//             timeReport.email,
-//             timeReport.time,
-//             timeReport.description,
-//             timeReport.hours,
-//             timeReport.project_id,
-//         ]
-//     );
-// };
-
-// export const updateTimeReport = (timeReport: TimeReport) => {
-
-//     return query(
-//         'UPDATE public.time_reports SET email = $1, time = $2, description = $3, hours = $4, project_id = $5 WHERE id = $6 RETURNING *',
-//         [
-//             timeReport.email,
-//             timeReport.time,
-//             timeReport.description,
-//             timeReport.hours,
-//             timeReport.project_id,
-//             timeReport.id,
-//         ]
-//     );
-// };
+export const updateTimeReport = async (id:string, timeReport: TimeReport) => {
+    return await TimeReportModel.findByIdAndUpdate({_id:id}, {$set:timeReport});
+}

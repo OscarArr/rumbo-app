@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Table, Button, IconButton, TrashIcon, CrossIcon, majorScale, MoreIcon, EditIcon } from "evergreen-ui";
-import { TimeReport } from "../types";
+import { TimeReport} from "../types";
 import styled from "styled-components";
 import dateformat from "dateformat";
 import { isMobile } from "react-device-detect";
@@ -10,8 +10,8 @@ import { Project } from "../app/slices/appSlice";
 import timeReportSlice from "./slices/timeReportSlice";
 
 type TimeReportRowType = {
-    timereport: TimeReport;
-    onRemove: (timereport: TimeReport) => any;
+    timereport: any;
+    onRemove: (timereport: any) => any;
     isAdmin: boolean;
 };
 
@@ -44,9 +44,42 @@ const TimeReportRow = ({
     const [showMoreMenu, setShowMoreMenu] = useState(false);
     const [showConfirmDelete, setShowConfirmDelete] = useState(false);
     const projects = useSelector((state: any) => state.app.projects); // flytta ut till View
-    
-    const project = projects.find((project: Project) => timereport.project_id === project.id);
+    //console.log('timereport: ', timereport);
+    let temp : any;
+    let tempDescription : any;
+    let tempTime : any;
+    if('_doc' in timereport && 'project_id' in timereport._doc){
+        temp = timereport._doc.project_id;
+        // console.log(temp);
+    }
+    else{
+        temp = timereport.project_id;
+    }
+    if('_doc' in timereport && 'description' in timereport._doc){
+        tempDescription = timereport._doc.description;
+        // console.log(tempDescription);
+    }
+    else{
+        tempDescription = timereport.description;
+    }
+    if('_doc' in timereport && 'time' in timereport._doc){
+        tempTime = timereport._doc.time;
+    }
+    else{
+        tempTime = timereport.time;
+    }
+    // console.log("projects", projects);
 
+   // const project = projects.find((project: Project) => timereport.project_id === project._id);
+    let project = projects.find((project1: Project) => {
+            return temp === project1._id; 
+    });
+    //console.log('project: ',project);
+    // if(project === undefined){
+    //     project = {
+    //         project_name : ""
+    //     }
+    // }
     const renderMoreMenu = () => (
         <>
             <IconButton icon={TrashIcon} intent="danger" marginLeft={majorScale(1)} onClick={() => { setShowConfirmDelete(true); setShowMoreMenu(false); }} />
@@ -60,7 +93,7 @@ const TimeReportRow = ({
             <Button marginLeft={majorScale(1)} intent="none" onClick={() => setShowConfirmDelete(false)}>Ångra</Button>
         </>
     )
-
+      
     return (
         <StyledTableRow
             key={timereport.id}
@@ -68,18 +101,18 @@ const TimeReportRow = ({
             {!isMobile && (
                 <>
                     <Table.TextCell maxWidth="125px">
-                        {dateformat(timereport.time, "yyyy-mm-dd")}
+                        {dateformat(tempTime, "yyyy-mm-dd")}
                     </Table.TextCell>
-                    <Table.TextCell>{timereport.description}</Table.TextCell>
+                    <Table.TextCell>{tempDescription}</Table.TextCell>
                 </>
             )}
             {isMobile && (
                 <>
                     <Table.TextCell>
                         <p>
-                            {dateformat(timereport.time, "yyyy-mm-dd")}
+                            {dateformat(tempTime, "yyyy-mm-dd")}
                             <br />
-                            {timereport.description}
+                            { tempDescription}
                         </p>
                     </Table.TextCell>
                 </>

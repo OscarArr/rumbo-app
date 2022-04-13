@@ -35,10 +35,11 @@ const EvergreenDatePicker = ({
   selectedTime,
   onChange,
 }: EvergreenDatePickerProps) => {
-  console.log('erer');
+  //console.log('erer');
   const ExampleCustomInput = forwardRef(({ onClick, value }: any, ref: any) => (
     <TextInput ref={ref} value={value} onClick={onClick} width="100%" />
   ));
+
   return (
     <DatePicker
       dateFormat="yyyy-MM-dd"
@@ -67,8 +68,8 @@ const EditTimeReportRow = ({
   const [project, setProject] = useState(getProjectName(timeReport.project_id, projects));
  
   const submitTimeReport = (timeReport: TimeReport) => {
-    console.log("save");
-    console.log(isFormValid(timeReport));
+    //console.log("save");
+    //console.log(isFormValid(timeReport));
     if (isFormValid(timeReport)) {
 
       if (timeReport.id > 0) {
@@ -81,10 +82,10 @@ const EditTimeReportRow = ({
 
   const isFormValid = (timeReport: TimeReport) => {
     let isValid = true;
-    console.log('desctription: ', timeReport.description);
-    console.log('hours: ', timeReport.hours);
-    console.log('id: ',timeReport.project_id);
-    console.log('time: ', timeReport.time);
+    // console.log('desctription: ', timeReport.description);
+    // console.log('hours: ', timeReport.hours);
+    // console.log('id: ',timeReport.project_id);
+    // console.log('time: ', timeReport.time);
     if (!timeReport.description) {
       setIsDescriptionValid(false);
       isValid = false;
@@ -93,9 +94,11 @@ const EditTimeReportRow = ({
     }
 
     if (timeReport.hours < 1) {
+      // console.log('hours to low');
       setIsHourValid(false);
       isValid = false;
     } else {
+      // console.log('hours fine');
       setIsHourValid(true);
     }
 
@@ -115,7 +118,7 @@ const EditTimeReportRow = ({
     );
 
     if (project) {
-      updateTimeReport({ ...timeReport, project_id: project.id });
+      updateTimeReport({ ...timeReport, project_id: project._id });
     }
   };
 

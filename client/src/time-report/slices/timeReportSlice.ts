@@ -41,6 +41,7 @@ export const fetchTimeReportsMeta: any = createAsyncThunk(
   "timereportmeta/fetch",
   async (user: any, thunkAPI) => {
     const state: any = thunkAPI.getState();
+    let test = await getTimeReportsMeta;
     return await getTimeReportsMeta(
       state.authentication.jwtIdToken,
       user.email
@@ -56,7 +57,6 @@ export const saveNewTimeReport: any = createAsyncThunk<any, TimeReport>(
       state.authentication.jwtIdToken,
       { ...timeReport, email: user.email, time: timeReport.time.toDateString() }
     );
-
     return response;
   }
 );
@@ -66,7 +66,6 @@ export const saveUpdatedTimeReport: any = createAsyncThunk<any, TimeReport>(
     const state: any = thunkAPI.getState();
     const response = await updateTimeReport(state.authentication.jwtIdToken, {...timeReport, time: timeReport.time.toDateString()}
     );
-    console.log("Vi har hamnat i slicen ", timeReport);
     return response;
   }
 );
@@ -121,16 +120,16 @@ const timeReportSlice = createSlice({
     },
 
     addNew(state, action: PayloadAction<Date>) {
-      console.log("new");
       const newTimeReport = {
         time: action.payload,
         description: '',
         hours: 0,
         id: -1,
         email: '',
-        project_id: 0,
-        editMode: true
+        project_id: "",
+        editMode: true,
       }
+
       state.entities.push(newTimeReport);
     },
 
@@ -183,7 +182,6 @@ const timeReportSlice = createSlice({
       //state.loading = "loading";
     },
     [saveNewTimeReport.fulfilled]: (state, action) => {
-
       //state.entities = [...state.entities].filter(timereport => !timereport.editMode);
       // delete state.newTimeReport;
       state.entities = [...state.entities, action.payload].filter(timereport => !timereport.editMode);

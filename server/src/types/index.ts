@@ -10,16 +10,17 @@ export type Transaction = {
 };
 
 export enum TransactionStatus {
-  Final,
-  Preliminary,
-  Rejected
+  Final = 0,
+  Preliminary = 1,
+  Rejected = 2
 }
 
 export type TimeReport = {
-  id?: number,
+  // _id?: string,
   email: string;
   time: Date;
   description: string;
   hours: number;
-  project_id: number;
+  project_id: string;
 }
+
